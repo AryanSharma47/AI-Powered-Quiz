@@ -7,68 +7,67 @@ const responseText = document.getElementById('responseText');
 const prev = document.getElementById('prev');
 const next = document.getElementById('next');
 const ratingDiv = document.getElementById('rating');
+const topicInput = document.getElementById('topicInput');
+const startQuiz = document.getElementById('startQuiz');
+const quizContent = document.getElementById('quizContent');
+
 
 const apiKey = 'AIzaSyAoZgZ4yzXGKHmXNaf4lb5_kNWiuBuOR1k';
 
 const genAI = new GoogleGenerativeAI(apiKey);
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-const quesArr = [
-    "What are functions in JavaScript?",
-    "Explain the concept of closures in JavaScript.",
-    "What is the difference between `let`, `var`, and `const` in JavaScript?",
-    "What is an arrow function in JavaScript?",
-    "Explain event bubbling and event capturing in JavaScript.",
-    "What are JavaScript promises?",
-    "What is the difference between synchronous and asynchronous JavaScript?",
-    "How do you create an object in JavaScript?",
-    "What is a callback function in JavaScript?",
-    "Explain the concept of hoisting in JavaScript."
-  ];
-
-let userArr = new Array(quesArr.length).fill(0);
-let userAnswers = [];  
+let userArr = new Array(10).fill(0);  // Track correctness for 10 questions
+let userAnswers = [];
+let generatedQuestions = [];
 let currInd = 0;
-  
+let topic = '';
+
+async function generateQuestion(index) {
+    if (!generatedQuestions[index]) {
+        const prompt = `Generate a random good single line question on ${topic}`;
+        const result = await model.generateContent(prompt);
+        generatedQuestions[index] = result.response.text();  // Store the generated question
+    }
+    return generatedQuestions[index];
+}
+
 function updateRatingDisplay(correct, incorrect) {
     ratingDiv.textContent = `Correct: ${correct}  |  Incorrect: ${incorrect}`;
 }
 
-function displayQuestion() {
-    ques.textContent = `Q${currInd + 1}- ${quesArr[currInd]}`;
+async function displayQuestion() {
+    const question = await generateQuestion(currInd);
+    ques.textContent = `Q${currInd + 1}- ${question}`;
     ans.value = userAnswers[currInd] || ""; 
-    responseText.textContent = ""; 
-    // Disable Prev button on the first question
+    responseText.textContent = "";
+
     prev.disabled = currInd === 0;
+    next.textContent = currInd === userArr.length - 1 ? "Show Result" : "Next";
+}
 
-    // Disable Next button and show result on the last question
-    if (currInd === quesArr.length - 1) {
-        next.textContent = "Show Result";
-        next.disabled = false;
-    } 
-    else {
-        next.textContent = "Next";
-        next.disabled = false;
+startQuiz.addEventListener('click', () => {
+    topic = topicInput.value;
+    if (!topic) {
+        alert('Please enter a topic!');
+        return;
     }
-  }
-  
-//First Queestion
-displayQuestion(); 
+    topicInput.disabled = true;
+    startQuiz.disabled = true;
+    quizContent.hidden = false;
+    displayQuestion();
+    next.disabled = false;
+});
 
-function showRating()
-{
+function showRating() {
     let correct = 0;
     let incorrect = 0;
-    console.log(userArr);
     userArr.forEach(ans => {
-        if(ans == 1)
-            correct++;
-        else if(ans == 0)
-            incorrect++;
+        if (ans === 1) correct++;
+        else if (ans === 0) incorrect++;
     });
-    //alert(`Correct: ${correct} Incorrect: ${incorrect}`);
     updateRatingDisplay(correct, incorrect);
-}  
+}
 
 async function submitAnswer() {
     const userAnswer = ans.value;
@@ -80,40 +79,34 @@ async function submitAnswer() {
 
     userAnswers[currInd] = userAnswer;
     const prompt = `Q: ${ques.textContent} \n
-                    A: ${userAnswer}    answer in 2 lines only`;
+                    A: ${userAnswer} answer in 2 lines only`;
 
     const result = await model.generateContent(prompt);
-    //console.log(result.response.text());
     responseText.textContent = result.response.text();
 
-    const promptAns = `Q: ${ques.textContent} \n
-                       A: ${userAnswer} if my answer if correct write  1 and if incorrect or empty write 0`;
+    const promptAns = `Q: ${ques.textContent} \nA: ${userAnswer} if my answer is correct write 1; if incorrect or empty write 0`;
 
-    const resultAns = await model.generateContent(promptAns);    
-    userArr[currInd] = (resultAns.response.text());
+    const resultAns = await model.generateContent(promptAns);
+    userArr[currInd] = parseInt(resultAns.response.text(), 10);
 }
 
-
-//Submit Handler
 submit.addEventListener('click', submitAnswer);
 
-//Next Handler
-next.addEventListener('click',()=>{
-    if (currInd < quesArr.length - 1) {
+next.addEventListener('click', () => {
+    if (currInd < userArr.length - 1) {
         currInd++;
         displayQuestion();
-    } 
-    else if (currInd === quesArr.length - 1) {
-        //next.disabled = true;
+    } else if (currInd === userArr.length - 1) {
         showRating();
     }
-})
+});
 
-//Previous Handler
-prev.addEventListener('click',()=>{
-    if(currInd > 0)
-    {
+prev.addEventListener('click', () => {
+    if (currInd > 0) {
         currInd--;
         displayQuestion();
     }
-})
+});
+
+
+//const apiKey = 'AIzaSyAoZgZ4yzXGKHmXNaf4lb5_kNWiuBuOR1k';
