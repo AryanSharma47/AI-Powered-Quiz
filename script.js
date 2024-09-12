@@ -12,7 +12,7 @@ const startQuiz = document.getElementById('startQuiz');
 const quizContent = document.getElementById('quizContent');
 
 
-const apiKey = 'AIzaSyAoZgZ4yzXGKHmXNaf4lb5_kNWiuBuOR1k';
+const apiKey = 'Your API Key Here';
 
 const genAI = new GoogleGenerativeAI(apiKey);
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
@@ -107,6 +107,3 @@ prev.addEventListener('click', () => {
         displayQuestion();
     }
 });
-
-
-//const apiKey = 'AIzaSyAoZgZ4yzXGKHmXNaf4lb5_kNWiuBuOR1k';
