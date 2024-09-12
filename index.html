@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Quiz</title>
+    <link href="style.css" rel="stylesheet"/>
+</head>
+<body>
+    <center><h2> Welcome to AI Quiz</h2></center>
+
+    <h3 id="ques">Questions will appear here.</h3>
+    <br>
+    <textarea id="ans" rows="6" cols="50"></textarea>
+    <br>
+
+    <div class="buttons">
+    <button id="prev">Prev</button>
+    <button id="submit" type="submit">Submit</button>
+    <button id="next">Next</button>
+    </div>
+
+    <h3>Response:</h3>
+    <p id="responseText">The response will appear here.</p>
+
+    <div id="rating" class="rating"></div>
+
+    <footer>
+      <span>By Aryan Sharma</span>
+    </footer>
+
+    <script type="importmap">
+      {
+        "imports": {
+          "@google/generative-ai": "https://esm.run/@google/generative-ai"
+        }
+      }
+    </script>
+    <script type="module" src="script.js"></script>
+</body>
+</html>
